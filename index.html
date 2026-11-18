@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+  <title>Gabarit — GPS pour véhicules hauts</title>
+  <meta name="description" content="Carte et itinéraires qui évitent les ponts, tunnels et portiques trop bas pour votre véhicule." />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Gabarit" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+
+  <!-- Connexions ouvertes tôt : la carte et les services répondent plus vite -->
+  <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
+  <link rel="preconnect" href="https://unpkg.com" crossorigin />
+  <link rel="dns-prefetch" href="https://photon.komoot.io" />
+  <link rel="dns-prefetch" href="https://valhalla1.openstreetmap.de" />
+  <link rel="dns-prefetch" href="https://overpass-api.de" />
+  <link rel="preload" href="https://tiles.openfreemap.org/styles/liberty" as="fetch" crossorigin="anonymous" />
+
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="css/app.css" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin="anonymous" defer></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/services.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <div id="map" role="application" aria-label="Carte"></div>
+  <div id="progress" class="progress" hidden></div>
+
+  <!-- Barre du haut -->
+  <header id="topbar">
+    <form id="searchbar" class="bar searchbar" role="search" autocomplete="off">
+      <button type="button" class="icon-btn" id="sb-back" aria-label="Retour" hidden>
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg>
+      </button>
+      <svg class="lens" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5-5-5Zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Z"/></svg>
+      <input id="q" type="search" placeholder="Rechercher une adresse, un lieu" enterkeyhint="search" spellcheck="false" />
+      <button type="button" class="icon-btn" id="sb-clear" aria-label="Effacer" hidden>
+        <svg viewBox="0 0 24 24"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>
+      </button>
+      <button type="button" class="icon-btn accent" id="sb-dir" aria-label="Itinéraire" title="Itinéraire">
+        <svg viewBox="0 0 24 24"><path d="m21.7 11.3-9-9a1 1 0 0 0-1.4 0l-9 9a1 1 0 0 0 0 1.4l9 9a1 1 0 0 0 1.4 0l9-9a1 1 0 0 0 0-1.4ZM14 14.5V12h-4v3H8v-4a1 1 0 0 1 1-1h5V7.5l3.5 3.5-3.5 3.5Z"/></svg>
+      </button>
+      <button type="button" class="avatar" data-open-vehicle aria-label="Mon véhicule">
+        <span data-v-icon>🚐</span><b data-v-h>2,7</b>
+      </button>
+    </form>
+
+    <div id="dirbar" class="bar dirbar" hidden>
+      <button type="button" class="icon-btn" id="dir-back" aria-label="Retour">
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg>
+      </button>
+      <div class="od">
+        <label class="od-row"><span class="dot start"></span><input id="from" placeholder="Choisir le départ" spellcheck="false" enterkeyhint="search" /></label>
+        <label class="od-row"><span class="dot end"></span><input id="to" placeholder="Choisir la destination" spellcheck="false" enterkeyhint="search" /></label>
+      </div>
+      <button type="button" class="icon-btn" id="dir-swap" aria-label="Inverser départ et arrivée">
+        <svg viewBox="0 0 24 24"><path d="M16 17v-7h-2v7h-3l4 4 4-4h-3ZM9 3 5 7h3v7h2V7h3L9 3Z"/></svg>
+      </button>
+    </div>
+
+    <ul id="suggest" class="suggest" role="listbox" hidden></ul>
+  </header>
+
+  <!-- Panneau : côté gauche sur ordinateur, feuille en bas sur téléphone -->
+  <section id="sheet" data-view="home" data-snap="peek" aria-live="polite">
+    <div class="sheet-handle" aria-hidden="true"><span></span></div>
+    <div class="sheet-scroll" id="sheet-scroll">
+
+      <!-- Accueil -->
+      <div class="view" data-view="home">
+        <button class="vehicle-card" data-open-vehicle data-peek>
+          <span class="vc-icon" data-v-icon>🚐</span>
+          <span class="vc-txt"><b data-v-label>Fourgon</b><small data-v-dims>2,70 m</small></span>
+          <span class="vc-edit">Modifier</span>
+        </button>
+        <div class="legend" aria-label="Légende">
+          <span><i class="lg red"></i>Ne passe pas</span>
+          <span><i class="lg orange"></i>Juste</span>
+          <span><i class="lg green"></i>Passe</span>
+          <span><i class="lg gray"></i>Inconnue</span>
+        </div>
+        <p class="tip only-mobile">Appui long sur la carte pour choisir un point.</p>
+        <p class="tip only-desktop">Clic droit sur la carte pour choisir un point.</p>
+        <div class="recent-block" id="recent-block" hidden>
+          <h3>Récents</h3>
+          <ul id="recent-list" class="list"></ul>
+        </div>
+      </div>
+
+      <!-- Lieu -->
+      <div class="view" data-view="place" hidden>
+        <div class="place-head">
+          <div>
+            <h2 id="place-name"></h2>
+            <p id="place-sub"></p>
+          </div>
+          <button class="icon-btn round" id="place-close" aria-label="Fermer">
+            <svg viewBox="0 0 24 24"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>
+          </button>
+        </div>
+        <div class="actions" data-peek>
+          <button class="btn primary" id="btn-route">
+            <svg viewBox="0 0 24 24"><path d="m21.7 11.3-9-9a1 1 0 0 0-1.4 0l-9 9a1 1 0 0 0 0 1.4l9 9a1 1 0 0 0 1.4 0l9-9a1 1 0 0 0 0-1.4ZM14 14.5V12h-4v3H8v-4a1 1 0 0 1 1-1h5V7.5l3.5 3.5-3.5 3.5Z"/></svg>
+            Itinéraire <span id="place-eta" class="eta"></span>
+          </button>
+          <button class="btn tonal" id="btn-from-here">Départ d'ici</button>
+        </div>
+      </div>
+
+      <!-- Itinéraire -->
+      <div class="view" data-view="directions" hidden>
+        <button class="vehicle-pill" data-open-vehicle>
+          <span data-v-icon>🚐</span><span data-v-dims>2,70 m</span>
+          <svg viewBox="0 0 24 24"><path d="M10 6 8.6 7.4l4.6 4.6-4.6 4.6L10 18l6-6z"/></svg>
+        </button>
+        <ul id="route-options" class="route-options"></ul>
+        <div id="route-status" class="route-status" data-peek hidden></div>
+        <p class="note">Calculé pour éviter les passages trop bas connus d'OpenStreetMap. Respectez toujours la signalisation.</p>
+        <ol id="steps" class="steps"></ol>
+      </div>
+
+      <!-- Véhicule -->
+      <div class="view" data-view="vehicle" hidden>
+        <div class="view-head">
+          <h2>Mon véhicule</h2>
+          <button class="text-btn" id="vehicle-done">OK</button>
+        </div>
+        <div id="presets" class="presets"></div>
+        <div class="group">
+          <div class="label">Hauteur totale (avec chargement, antennes…)</div>
+          <div class="height-value">
+            <button class="icon-btn round big" data-step="-0.05" aria-label="Diminuer">−</button>
+            <output id="h-out">2,70 m</output>
+            <button class="icon-btn round big" data-step="0.05" aria-label="Augmenter">+</button>
+          </div>
+          <input id="h-range" type="range" min="1.4" max="4.6" step="0.05" aria-label="Hauteur" />
+          <div class="ticks"><span>1,4 m</span><span>3 m</span><span>4,6 m</span></div>
+        </div>
+        <div class="group rows">
+          <label class="row"><span>Largeur</span><span class="num"><input id="v-width" type="number" inputmode="decimal" min="1" max="3" step="0.05" /> m</span></label>
+          <label class="row"><span>Longueur</span><span class="num"><input id="v-length" type="number" inputmode="decimal" min="2" max="25" step="0.1" /> m</span></label>
+          <label class="row"><span>Poids total</span><span class="num"><input id="v-weight" type="number" inputmode="decimal" min="0.5" max="44" step="0.1" /> t</span></label>
+          <label class="row"><span>Marge de sécurité</span><span class="num"><input id="v-margin" type="number" inputmode="decimal" min="0" max="0.5" step="0.05" /> m</span></label>
+        </div>
+        <div class="group model-row" aria-disabled="true">
+          <span class="model-ico">🔍</span>
+          <div><b>Choisir un modèle</b><small>Remplir les dimensions depuis la base de données des véhicules</small></div>
+          <span class="badge">Bientôt</span>
+        </div>
+        <p class="note">Au-delà de 3,5 t, l'itinéraire utilise le profil poids lourd (poids et longueur pris en compte).</p>
+      </div>
+
+      <footer class="sheet-foot">
+        <a href="legal.html#confidentialite">Confidentialité</a> ·
+        <a href="legal.html#conditions">Conditions</a> ·
+        <a href="legal.html#sources">© OpenStreetMap</a>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Boutons flottants -->
+  <div id="fabs">
+    <button class="fab" id="btn-compass" aria-label="Remettre le nord en haut" hidden>
+      <svg viewBox="0 0 24 24" id="compass-ico"><path d="M12 2 7 12h10z" fill="#e53935"/><path d="M12 22l5-10H7z" fill="#9aa0a6"/></svg>
+    </button>
+    <div class="zoom only-desktop">
+      <button class="fab" id="btn-zin" aria-label="Zoom avant"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg></button>
+      <button class="fab" id="btn-zout" aria-label="Zoom arrière"><svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14z"/></svg></button>
+    </div>
+    <button class="fab" id="btn-locate" aria-label="Ma position">
+      <svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm8.9 3A9 9 0 0 0 13 3.1V1h-2v2.1A9 9 0 0 0 3.1 11H1v2h2.1a9 9 0 0 0 7.9 7.9V23h2v-2.1a9 9 0 0 0 7.9-7.9H23v-2h-2.1ZM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg>
+    </button>
+  </div>
+
+  <div id="hint" class="hint" hidden></div>
+  <div id="toast" class="toast" role="status"></div>
+
+  <!-- Explication avant la demande de position -->
+  <div id="loc-ask" class="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="loc-title">
+      <h2 id="loc-title">Utiliser votre position ?</h2>
+      <p>Gabarit utilise votre position <b>uniquement pendant que l'application est ouverte</b>, pour l'afficher sur la carte et calculer un itinéraire depuis l'endroit où vous êtes.</p>
+      <p class="small">Elle n'est pas enregistrée par Gabarit. Pour un itinéraire, le point de départ est envoyé au service de calcul d'itinéraire. <a href="legal.html#confidentialite">En savoir plus</a></p>
+      <button class="btn primary" id="loc-yes">Continuer</button>
+      <button class="btn tonal" id="loc-no">Pas maintenant</button>
+    </div>
+  </div>
+
+  <!-- Avertissement de sécurité (1er lancement) -->
+  <div id="safety" class="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="safety-title">
+      <h2 id="safety-title">Avant de partir</h2>
+      <ul>
+        <li>Les hauteurs viennent d'<b>OpenStreetMap</b>, une carte collaborative : certaines sont <b>absentes ou fausses</b>.</li>
+        <li>Les <b>panneaux sur la route</b> et la hauteur réelle de votre véhicule priment toujours sur l'application.</li>
+        <li>Ne manipulez pas votre téléphone en conduisant.</li>
+      </ul>
+      <p class="small">En continuant, vous acceptez les <a href="legal.html#conditions">conditions d'utilisation</a> et la <a href="legal.html#confidentialite">politique de confidentialité</a>.</p>
+      <button class="btn primary" id="safety-ok">J'ai compris</button>
+    </div>
+  </div>
+</body>
+</html>

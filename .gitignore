@@ -1,0 +1,25 @@
+# Données générées : fichier OSM, réseau routier, hauteurs extraites (plusieurs centaines de Mo).
+# Elles se reconstruisent avec les commandes du README.
+/data/
+
+# Environnement Python
+.venv/
+server/.venv/
+__pycache__/
+*.py[cod]
+
+# Archives et journaux
+*.tar
+*.tar.gz
+*.log
+
+# Configuration locale
+.env
+.env.*
+
+# Système et éditeurs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

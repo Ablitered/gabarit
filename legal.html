@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Gabarit — Confidentialité, conditions et sources</title>
+  <meta name="theme-color" content="#ffffff" />
+  <style>
+    :root { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #1f1f1f; line-height: 1.55; }
+    @media (prefers-color-scheme: dark) { :root { color: #e8eaed; background: #202124; } a { color: #8ab4f8; } }
+    body { margin: 0 auto; max-width: 760px; padding: calc(env(safe-area-inset-top) + 16px) 20px 48px; }
+    h1 { font-size: 26px; font-weight: 500; } h2 { font-size: 20px; font-weight: 600; margin-top: 36px; }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; } td, th { border-bottom: 1px solid #ddd; padding: 8px 6px; text-align: left; vertical-align: top; }
+    .todo { background: #fff4e5; color: #8a4b00; padding: 2px 6px; border-radius: 4px; }
+    .back { display: inline-block; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <a class="back" href="./">← Retour à la carte</a>
+  <h1>Gabarit — informations légales</h1>
+  <p>Dernière mise à jour : 18 novembre 2026. Éditeur : <span class="todo">[nom / société à compléter]</span> — contact : <span class="todo">[adresse e-mail à compléter]</span>.</p>
+
+  <h2 id="confidentialite">Politique de confidentialité</h2>
+  <p><b>En bref : Gabarit n'a pas de compte utilisateur, pas de publicité, pas de mesure d'audience et pas de cookies.</b> Nous ne gardons aucune donnée vous concernant sur nos serveurs.</p>
+  <table>
+    <tr><th>Donnée</th><th>Utilisation</th><th>Envoyée à</th></tr>
+    <tr><td>Position (si vous l'autorisez)</td><td>Afficher votre point sur la carte ; servir de point de départ. Utilisée seulement quand l'application est ouverte.</td><td>Au service de calcul d'itinéraire, uniquement quand vous demandez un trajet depuis « Ma position ».</td></tr>
+    <tr><td>Texte des recherches</td><td>Trouver une adresse ou un lieu.</td><td>Service de recherche d'adresses (Photon, komoot).</td></tr>
+    <tr><td>Départ et arrivée d'un trajet</td><td>Calculer l'itinéraire adapté à la hauteur.</td><td>Service d'itinéraire (Valhalla, FOSSGIS e.V.).</td></tr>
+    <tr><td>Zone de carte affichée / tracé du trajet</td><td>Récupérer les hauteurs limitées (ponts, tunnels, portiques).</td><td>Serveurs Overpass (données OpenStreetMap).</td></tr>
+    <tr><td>Fonds de carte</td><td>Afficher la carte.</td><td>OpenFreeMap.</td></tr>
+    <tr><td>Dimensions du véhicule, lieux récents, cache de carte</td><td>Retrouver vos réglages et accélérer l'affichage.</td><td>Restent sur votre appareil uniquement.</td></tr>
+  </table>
+  <p>Ces services reçoivent aussi, comme tout site web, l'adresse IP de votre appareil. Ils sont exploités par des tiers : <a href="https://www.fossgis.de/datenschutzerkl%C3%A4rung/">FOSSGIS e.V. (politique de confidentialité)</a>, <a href="https://photon.komoot.io/">komoot (Photon)</a>, <a href="https://openfreemap.org/">OpenFreeMap</a>.</p>
+  <p><b>Effacer vos données :</b> supprimez l'application, ou effacez les données du site dans les réglages de votre navigateur. <b>Retirer l'accès à la position :</b> réglages de votre téléphone ou de votre navigateur, à tout moment.</p>
+
+  <h2 id="conditions">Conditions d'utilisation</h2>
+  <ul>
+    <li>Gabarit est une <b>aide à la préparation de trajet</b>. Les hauteurs proviennent d'OpenStreetMap, une carte collaborative : elles peuvent être <b>absentes, inexactes ou périmées</b> (travaux, réfection de chaussée, neige…).</li>
+    <li>La <b>signalisation routière</b> et la hauteur réelle du véhicule (chargement, antennes, coffre de toit, climatisation, panneaux solaires…) priment toujours. Le conducteur reste seul responsable de sa conduite et du respect du code de la route.</li>
+    <li>Quand une hauteur est inconnue sur le trajet, l'application le signale : la compatibilité ne peut alors pas être garantie.</li>
+    <li>Ne manipulez pas l'application en conduisant ; préparez votre trajet à l'arrêt ou confiez-le à un passager.</li>
+    <li>Le service est fourni sans garantie de disponibilité.</li>
+  </ul>
+
+  <h2 id="sources">Sources et licences</h2>
+  <ul>
+    <li>Données cartographiques : <a href="https://www.openstreetmap.org/copyright">© contributeurs OpenStreetMap</a>, sous licence <a href="https://opendatacommons.org/licenses/odbl/">ODbL</a>. Une erreur ? <a href="https://www.openstreetmap.org/fixthemap">Signalez-la ou corrigez-la</a>.</li>
+    <li>Fond de carte : <a href="https://openfreemap.org/">OpenFreeMap</a> © <a href="https://openmaptiles.org/">OpenMapTiles</a>.</li>
+    <li>Affichage de carte : <a href="https://maplibre.org/">MapLibre GL JS</a> (licence BSD-3).</li>
+    <li>Itinéraires : <a href="https://github.com/valhalla/valhalla">Valhalla</a> (licence MIT), serveur <a href="https://www.fossgis.de/">FOSSGIS e.V.</a></li>
+    <li>Recherche d'adresses : <a href="https://photon.komoot.io/">Photon</a> par komoot (licence Apache 2.0).</li>
+    <li>Hauteurs limitées : <a href="https://overpass-api.de/">Overpass API</a>.</li>
+  </ul>
+</body>
+</html>

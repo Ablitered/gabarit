@@ -1,0 +1,4 @@
+# Outils serveur (Python 3.12+). Versions figées : le format des tuiles Valhalla
+# dépend de la version du moteur.
+pyvalhalla==3.9.3
+osmium==4.3.2
